@@ -110,3 +110,14 @@ func TestReadJSONOK(t *testing.T) {
 		t.Fatalf("want x, got %q", dst.Known)
 	}
 }
+
+func TestNewServerHasHardenedTimeouts(t *testing.T) {
+	srv := NewServer(":8080", newTestRouter())
+	if srv.Addr != ":8080" {
+		t.Fatalf("addr = %q, want :8080", srv.Addr)
+	}
+	if srv.ReadTimeout == 0 || srv.ReadHeaderTimeout == 0 ||
+		srv.WriteTimeout == 0 || srv.IdleTimeout == 0 || srv.MaxHeaderBytes == 0 {
+		t.Fatalf("expected all timeouts + MaxHeaderBytes set, got %+v", srv)
+	}
+}

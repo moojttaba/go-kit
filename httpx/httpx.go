@@ -96,3 +96,19 @@ func ReadJSON(r *http.Request, v any) error {
 	dec.DisallowUnknownFields()
 	return dec.Decode(v)
 }
+
+// NewServer returns an *http.Server for handler with hardened timeouts — read,
+// read-header, write and idle — plus a header-size cap, so services get
+// slowloris protection by default instead of only ReadHeaderTimeout. Callers
+// still own start/shutdown.
+func NewServer(addr string, handler http.Handler) *http.Server {
+	return &http.Server{
+		Addr:              addr,
+		Handler:           handler,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       15 * time.Second,
+		WriteTimeout:      15 * time.Second,
+		IdleTimeout:       60 * time.Second,
+		MaxHeaderBytes:    1 << 20,
+	}
+}
