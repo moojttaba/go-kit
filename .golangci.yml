@@ -1,0 +1,21 @@
+# Shared golangci-lint config (v2) for the new-code Go repos.
+# Security scanning lives elsewhere (govulncheck, Trivy, gitleaks); this focuses
+# on correctness and clean style.
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  default: standard # errcheck, govet, ineffassign, staticcheck, unused
+  enable:
+    - revive # style / lint rules
+    - misspell # common English misspellings
+    - unconvert # redundant type conversions
+    - errorlint # correct error wrapping & comparisons
+    - bodyclose # http response bodies are closed
+
+formatters:
+  enable:
+    - gofumpt # stricter gofmt
+    - goimports # group & tidy imports

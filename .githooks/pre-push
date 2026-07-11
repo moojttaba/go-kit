@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Pre-push gate — blocks pushing a red commit to main (mirrors CI, RULES §4).
+# Enable once per clone:  make hooks     (= git config core.hooksPath .githooks)
+# Emergency bypass:       git push --no-verify
+set -euo pipefail
+
+protected="refs/heads/main"
+pushing_to_main=false
+while read -r _lref _lsha rref _rsha; do
+  [ "$rref" = "$protected" ] && pushing_to_main=true
+done
+
+$pushing_to_main || exit 0
+
+echo "▶ pre-push gate (main): vet · test · lint · gitleaks · govulncheck"
+
+go vet ./...
+go test ./...
+
+if command -v golangci-lint >/dev/null 2>&1; then
+  golangci-lint run --timeout=5m
+else
+  echo "⚠ golangci-lint not installed — skipping lint (brew install golangci-lint)"
+fi
+
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks git . --redact --exit-code 1
+else
+  echo "⚠ gitleaks not installed — skipping secret scan (brew install gitleaks)"
+fi
+
+if [ "${SKIP_VULN:-0}" != "1" ]; then
+  go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...
+else
+  echo "⚠ govulncheck skipped (SKIP_VULN=1)"
+fi
+
+echo "✓ pre-push gate passed"
