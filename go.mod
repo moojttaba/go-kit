@@ -3,7 +3,7 @@ module github.com/moojttaba/go-kit
 go 1.26.5
 
 require (
-	github.com/go-chi/chi/v5 v5.3.1
+	github.com/go-chi/chi/v5 v5.3.2
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/prometheus/client_golang v1.23.2
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.69.0
